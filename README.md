@@ -21,6 +21,29 @@ map_to_struct! {
 
 This generates a `to_typed()` method that extracts and converts each field automatically.
 
+```rust
+// Granular getter with specta support
+#[tauri::command]
+#[specta::specta]
+pub fn get_frontend_state_value(key: String) -> Result<JsonValue, String> {
+    with_state(|st8| {
+        st8.front_end_state.get(&key)
+            .cloned()
+            .map(JsonValue)
+            .ok_or_else(|| format!("Key not found: {}", key))
+    })
+}
+
+// Get entire state as strongly typed struct
+#[tauri::command]
+#[specta::specta]
+pub fn fetch_cached_state() -> Result<FrontEndSt8, String> {
+    with_state(|st8| {
+        st8.front_end_state.to_typed()
+    })
+}
+```
+
 ## Benefits
 - **Type-safe**: Compiler verifies all conversions match the struct definition
 - **DRY**: Field list appears once, conversion logic auto-generates
